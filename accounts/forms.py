@@ -1,6 +1,5 @@
 from django import forms
-from django_recaptcha.fields import ReCaptchaField
-
+# from django_recaptcha.fields import ReCaptchaField
 from accounts.models import userDetails
 from django.contrib.auth import get_user_model
 
@@ -13,11 +12,11 @@ class UserForm(forms.ModelForm):
         model = User
         fields = ['username','email','password']
 
-class userFormDetails(forms.ModelForm):
-    class Meta:
-        model = userDetails
-        fields = ['phone', 'house_no','street','city','state','zipcode','img'] 
-    captcha = ReCaptchaField()
+# class userFormDetails(forms.ModelForm):
+#     class Meta:
+#         model = userDetails
+#         fields = ['phone', 'house_no','street','city','state','zipcode','img'] 
+#     captcha = ReCaptchaField()
 
 class UserUpdateForm(forms.ModelForm):
     class Meta:
