@@ -5,124 +5,49 @@
 
 {% block start %}
 <div class="auth-wrapper">
-  <div class="auth-card" style="max-width: 700px;">
-    <div class="auth-header">
-      <div class="mb-3">
-        <i class="fas fa-user-plus fa-3x text-primary"></i>
-      </div>
-      <h2 class="auth-title">Create Your Account</h2>
-      <p class="auth-subtitle">Join FoodHub and start ordering delicious food</p>
+  <div class="auth-card" style="max-width: 500px;">
+    <div class="auth-header text-center">
+      <h2>Create Your Account</h2>
+      <p>Join FoodHub</p>
     </div>
 
     {% if registerd %}
-    <div class="alert alert-success" role="alert">
-      <i class="fas fa-check-circle me-2"></i>
-      <strong>Registration Successful!</strong> Thank you for registering with FoodHub.
-    </div>
-    <div class="text-center">
-      <p class="mb-3">Your account has been created successfully. Please proceed to login.</p>
-      <a href="{% url 'login' %}" class="btn btn-primary">
-        <i class="fas fa-sign-in-alt me-2"></i>Go to Login
-      </a>
-    </div>
+      <div class="alert alert-success">
+        Registration successful.
+        <a href="{% url 'login' %}">Login here</a>
+      </div>
     {% else %}
-    
-    {% if form1.errors or form2.errors %}
-    <div class="alert alert-danger" role="alert">
-      <i class="fas fa-exclamation-circle me-2"></i>
-      <strong>Please correct the errors below:</strong>
-      <ul class="mb-0 mt-2">
-        {% for field in form1 %}
-          {% for error in field.errors %}
-            <li>{{ field.label }}: {{ error }}</li>
-          {% endfor %}
-        {% endfor %}
-        {% for field in form2 %}
-          {% for error in field.errors %}
-            <li>{{ field.label }}: {{ error }}</li>
-          {% endfor %}
-        {% endfor %}
-        {% for error in form1.non_field_errors %}
-          <li>{{ error }}</li>
-        {% endfor %}
-        {% for error in form2.non_field_errors %}
-          <li>{{ error }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-    {% endif %}
 
-    <form action="" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-      {% csrf_token %}
-      
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          {{form1.username | as_crispy_field}}
+      {% if form1.errors %}
+        <div class="alert alert-danger">
+          <ul>
+            {% for field in form1 %}
+              {% for error in field.errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
         </div>
-        <div class="col-md-6 mb-3">
-          {{form1.email | as_crispy_field}}
-        </div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+
+        {{ form1.username|as_crispy_field }}
+        {{ form1.email|as_crispy_field }}
+        {{ form1.password|as_crispy_field }}
+
+        <button type="submit" class="btn btn-primary w-100">
+          Register
+        </button>
+      </form>
+
+      <div class="text-center mt-3">
+        Already have an account?
+        <a href="{% url 'login' %}">Login</a>
       </div>
 
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          {{form2.phone | as_crispy_field}}
-        </div>
-        <div class="col-md-6 mb-3">
-          {{form2.house_no | as_crispy_field}}
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          {{form2.street | as_crispy_field}}
-        </div>
-        <div class="col-md-6 mb-3">
-          {{form2.city | as_crispy_field}}
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          {{form2.state | as_crispy_field}}
-        </div>
-        <div class="col-md-6 mb-3">
-          {{form2.zipcode | as_crispy_field}}
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          {{form2.img | as_crispy_field}}
-        </div>
-        <div class="col-md-6 mb-3">
-          {{form1.password | as_crispy_field}}
-        </div>
-      </div>
-
-      <div class="mb-3">
-        {{form2.captcha | as_crispy_field}}
-      </div>
-
-      <div class="mb-3 form-check">
-        <input type="checkbox" class="form-check-input" id="termsCheck" required>
-        <label class="form-check-label" for="termsCheck">
-          I agree to the <a href="#" class="text-primary">Terms & Conditions</a> and <a href="#" class="text-primary">Privacy Policy</a>
-        </label>
-        <div class="invalid-feedback">
-          You must agree to the terms and conditions.
-        </div>
-      </div>
-
-      <button type="submit" class="btn btn-primary w-100 mb-3">
-        <i class="fas fa-user-plus me-2"></i>Create Account
-      </button>
-    </form>
-
-    <div class="text-center">
-      <p class="mb-0">Already have an account? <a href="{% url 'login' %}" class="text-primary fw-bold">Sign In</a></p>
-    </div>
     {% endif %}
   </div>
 </div>
-{% endblock start %}
+{% endblock %}
