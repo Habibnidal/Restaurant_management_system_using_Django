@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ vender.restaurent_name }} - FoodHub{% endblock %}
+
+{% block head %}
+<style>
+    .vendor-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .vendor-profile-card {
+        background: var(--white);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 2rem;
+    }
+    
+    .vendor-image {
+        width: 250px;
+        height: 250px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 5px solid var(--primary-color);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .franchise-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+        transition: var(--transition);
+    }
+    
+    .franchise-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .food-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .food-card {
+        background: var(--white);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+    }
+    
+    .food-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .food-card-img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-sm);
+    }
+</style>
+{% endblock head %}
+
+{% block start %}
+<div class="container mt-4">
+    <div class="vendor-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h1 class="mb-2">
+                    <i class="fas fa-store me-2"></i>{{ vender.restaurent_name }}
+                </h1>
+                {% if vender.is_approved %}
+                <span class="badge bg-success fs-6">
+                    <i class="fas fa-check-circle me-1"></i>Verified Restaurant
+                </span>
+                {% endif %}
+            </div>
+            {% if vender.user == request.user %}
+            <a href="{% url 'venders:edit_vendor' vender.id %}" class="btn btn-light mt-3 mt-md-0">
+                <i class="fas fa-edit me-2"></i>Edit Profile
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+        {% if vender.is_approved %}
+        <div class="vendor-profile-card">
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center mb-4 mb-md-0">
+                    {% if vender.restaurent_img %}
+                    <img src="{{ vender.restaurent_img.url }}" alt="{{ vender.restaurent_name }}" 
+                         class="vendor-image">
+                    {% else %}
+                    <div class="vendor-image d-flex align-items-center justify-content-center bg-light">
+                        <i class="fas fa-store fa-4x text-muted"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-8">
+                    <h3 class="mb-4">{{ vender.restaurent_name }}</h3>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <p class="mb-2">
+                                <i class="fas fa-user text-primary me-2"></i>
+                                <strong>Vendor:</strong> {{ vender.user.get_full_name|default:vender.user.username }}
+                            </p>
+                            <p class="mb-2">
+                                <i class="fas fa-envelope text-primary me-2"></i>
+                                <strong>Email:</strong> {{ vender.user.email }}
+                            </p>
+                            <p class="mb-2">
+                                <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                <strong>Address:</strong> {{ vender.address }}
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <p class="mb-2">
+                                <i class="fas fa-city text-primary me-2"></i>
+                                <strong>City:</strong> {{ vender.city }}
+                            </p>
+                            <p class="mb-2">
+                                <i class="fas fa-flag text-primary me-2"></i>
+                                <strong>State:</strong> {{ vender.state }}
+                            </p>
+                            <p class="mb-2">
+                                <i class="fas fa-mail-bulk text-primary me-2"></i>
+                                <strong>Zipcode:</strong> {{ vender.zipcode }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if vender.is_approved and vender.is_franchise_available %}
+        <div class="card mb-4 franchise-card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h3 class="mb-0"><i class="fas fa-bolt me-2"></i>Franchise Opportunity</h3>
+                <a href="{% url 'venders:franchise_details' vendor_id=vender.id %}" class="btn btn-light btn-sm">
+                    <i class="fas fa-external-link-alt me-1"></i> View Details
+                </a>
+            </div>
+
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex flex-wrap gap-4 mb-3">
+                            <div>
+                                <h5 class="mb-1 text-muted">Investment</h5>
+                                <h4 class="mb-0">₹{{ vender.franchise_investment|floatformat:2 }}</h4>
+                            </div>
+                            <div>
+                                <h5 class="mb-1 text-muted">Agreement</h5>
+                                <h4 class="mb-0">{{ vender.agreement_years }} Years</h4>
+                            </div>
+                            <div>
+                                <h5 class="mb-1 text-muted">Profit Share</h5>
+                                <h4 class="mb-0">{{ vender.profit_share_percentage }}%</h4>
+                            </div>
+                        </div>
+                        <p class="text-muted mb-0">{{ vender.franchise_description|truncatewords:20 }}</p>
+                    </div>
+
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        {% if user.is_authenticated and user != vender.user %}
+                            {% if not user_has_pending_request %}
+                                <a href="{% url 'venders:franchise_details' vendor_id=vender.id %}" 
+                                   class="btn btn-success btn-lg">
+                                    <i class="fas fa-handshake me-2"></i> Learn More
+                                </a>
+                            {% else %}
+                                <div class="alert alert-info mb-0">
+                                    <i class="fas fa-clock me-2"></i> Request Pending
+                                </div>
+                            {% endif %}
+                        {% elif not user.is_authenticated %}
+                            <a href="{% url 'login' %}?next={% url 'venders:franchise_details' vendor_id=vender.id %}" 
+                               class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i> Login to View Details
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-utensils me-2"></i>Food Menu
+            </h2>
+        </div>
+
+        {% if fooditems %}
+        <div class="food-grid">
+            {% for food in fooditems %}
+            <div class="food-card">
+                {% if food.food_img %}
+                <img src="{{ food.food_img.url }}" 
+                     class="food-card-img" 
+                     alt="{{ food.food_name }}">
+                {% else %}
+                <div class="food-card-img bg-light d-flex align-items-center justify-content-center">
+                    <i class="fas fa-utensils fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+
+                <div class="card-body">
+                    <h5 class="card-title">{{ food.food_name }}</h5>
+                    <p class="card-text text-muted">{{ food.food_desc|truncatewords:15 }}</p>
+                    <p class="card-text">
+                        <strong class="text-primary fs-4">₹{{ food.price }}</strong>
+                    </p>
+
+                    {% if user.is_authenticated %}
+                        {% if user_type == 'customer' %}
+                        <form method="post" action="{% url 'cart:add_to_cart' food.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                            </button>
+                        </form>
+                        {% elif user_type == 'vender' %}
+                        <div class="alert alert-info mb-0 text-center">
+                            <i class="fas fa-info-circle me-2"></i>Vendors cannot add items to cart
+                        </div>
+                        {% else %}
+                        <form method="post" action="{% url 'cart:add_to_cart' food.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                            </button>
+                        </form>
+                        {% endif %}
+                    {% else %}
+                    <a href="{% url 'login' %}?next={% url 'venders:venderdetails' vender.id %}" class="btn btn-primary w-100">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login to Order
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-utensils"></i>
+            </div>
+            <h3 class="empty-title">No Menu Items Available</h3>
+            <p class="empty-text">This restaurant hasn't added any items to their menu yet.</p>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <h3 class="empty-title">Waiting for Approval</h3>
+            <p class="empty-text">This restaurant is currently pending admin approval.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock start %}

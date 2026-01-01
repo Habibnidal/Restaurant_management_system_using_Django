@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block start %}
+<div class="container mt-5">
+    <h2 class="mb-4">Accepted Franchise Users</h2>
+
+    {% if accepted_requests %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>User Name</th>
+                        <th>Email</th>
+                        <th>Restaurant Name</th>
+                        <th>City</th>
+                        <th>Accepted Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in accepted_requests %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ req.user.username }}</td>
+                        <td>{{ req.user.email }}</td>
+                        <td>{{ req.vendor.restaurent_name }}</td>
+                        <td>{{ req.vendor.city }}</td>
+                        <td>{{ req.accepted_at|date:"d M Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <!-- IMPORTANT EMPTY STATE -->
+        <div class="alert alert-info text-center">
+            <h5>No order acceptance yet</h5>
+            <p>No users have accepted your franchise opportunity.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

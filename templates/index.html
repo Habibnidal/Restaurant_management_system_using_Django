@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}FoodHub - Order Food Online{% endblock %}
+
+{% block head %}
+<style>
+  .hero-banner {
+    position: relative;
+    width: 100%;
+    height: 60vh;
+    min-height: 400px;
+    overflow: hidden;
+    border-radius: var(--border-radius);
+    margin: 2rem 0;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .hero-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .hero-banner:hover img {
+    transform: scale(1.05);
+  }
+
+  .hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 180, 216, 0.8) 0%, rgba(0, 119, 182, 0.8) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .hero-content h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  }
+
+  .hero-content p {
+    font-size: 1.25rem;
+    opacity: 0.95;
+  }
+
+  .section-title {
+    text-align: center;
+    margin: 3rem 0 2rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    position: relative;
+    padding-bottom: 1rem;
+  }
+
+  .section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+    border-radius: 2px;
+  }
+
+  .restaurant-grid {
+    padding: 2rem 0;
+  }
+
+  .restaurant-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .restaurant-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--success-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    z-index: 2;
+    box-shadow: var(--shadow-md);
+  }
+
+  @media (max-width: 768px) {
+    .hero-content h1 {
+      font-size: 2.5rem;
+    }
+    .hero-content p {
+      font-size: 1rem;
+    }
+  }
+</style>
+{% endblock head %}
+
+{% block start %}
+
+<!-- Hero Banner Section -->
+<div class="container">
+  <div class="hero-banner">
+    <img src="{% static 'images/food.jpg' %}" alt="Delicious Food">
+    <div class="hero-overlay">
+      <div class="hero-content">
+        <h1>Delicious Food, Delivered</h1>
+        <p>Order from your favorite restaurants and enjoy fresh meals at your doorstep</p>
+        {% if not user.is_authenticated %}
+        <div class="mt-4">
+          <a href="{% url 'register' %}" class="btn btn-primary btn-lg me-2">
+            <i class="fas fa-user-plus me-2"></i>Get Started
+          </a>
+          <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg">
+            <i class="fas fa-sign-in-alt me-2"></i>Login
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Restaurants Section -->
+<div class="container">
+  <h2 class="section-title">
+    <i class="fas fa-store me-2"></i>Our Restaurants
+  </h2>
+
+  {% if venders %}
+  <div class="restaurant-grid">
+    {% for vender in venders %}
+    <div class="restaurant-card card">
+      {% if vender.is_approved %}
+      <span class="restaurant-badge">
+        <i class="fas fa-check-circle me-1"></i>Verified
+      </span>
+      {% endif %}
+      
+      <a href="{% url 'venders:venderdetails' vender.id %}" style="text-decoration: none; color: inherit;">
+        {% if vender.restaurent_img %}
+          <img src="{{ vender.restaurent_img.url }}" class="restaurant-image" alt="{{ vender.restaurent_name }}">
+        {% else %}
+          <div class="restaurant-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">
+            <i class="fas fa-utensils"></i>
+          </div>
+        {% endif %}
+        
+        <div class="restaurant-info">
+          <h5 class="restaurant-name">
+            <i class="fas fa-store me-2"></i>{{ vender.restaurent_name }}
+          </h5>
+          <p class="text-muted mb-2">
+            <i class="fas fa-map-marker-alt me-1"></i>{{ vender.city }}, {{ vender.state }}
+          </p>
+          {% if vender.is_franchise_available %}
+          <span class="badge bg-info">
+            <i class="fas fa-bolt me-1"></i>Franchise Available
+          </span>
+          {% endif %}
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-store-slash"></i>
+    </div>
+    <h3 class="empty-title">No Restaurants Available</h3>
+    <p class="empty-text">Check back soon for amazing restaurants in your area!</p>
+    {% if user.user_type == 'vender' %}
+    <a href="{% url 'venders:venderregister' %}" class="btn btn-primary">
+      <i class="fas fa-plus me-2"></i>Register Your Restaurant
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+{% endblock start %}

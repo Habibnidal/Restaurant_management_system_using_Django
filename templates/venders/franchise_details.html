@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block start %}
+<div class="container my-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">
+                <i class="fas fa-store-alt me-2"></i>
+                Franchise Opportunity - {{ vendor.restaurent_name }}
+            </h2>
+        </div>
+
+        <div class="card-body">
+            <!-- Franchise Details Section -->
+            <div class="row mb-5">
+                <div class="col-md-6">
+                    <h3 class="mb-4">Franchise Details</h3>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Investment Details</h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Total Investment</span>
+                                    <span class="fw-bold">
+                                        ₹{{ vendor.franchise_investment|floatformat:2 }}
+                                    </span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Agreement Period</span>
+                                    <span class="fw-bold">
+                                        {{ vendor.franchise_term_years }} years
+                                    </span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Profit Share</span>
+                                    <span class="fw-bold">
+                                        {{ vendor.franchise_profit_share }}%
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Business Description</h5>
+                            <p class="card-text">
+                                {{ vendor.franchise_message|default:"No additional details provided." }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h3 class="mb-4">What would you like to do?</h3>
+
+                    <div class="d-flex justify-content-center gap-4">
+                        <!-- Accept Franchise Button -->
+                        <div class="card" style="width: 18rem;">
+                            <div class="card-body text-center">
+                                <i class="fas fa-handshake fa-3x text-primary mb-3"></i>
+                                <h5 class="card-title">Accept Franchise</h5>
+                                <p class="card-text">
+                                    Proceed with the franchise application process
+                                </p>
+
+                                {% if user_has_pending_request %}
+                                    <button class="btn btn-outline-secondary" disabled>
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        Request Submitted
+                                    </button>
+                                {% else %}
+                                    <form method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" name="accept_franchise" class="btn btn-primary">
+                                            <i class="fas fa-paper-plane me-2"></i>
+                                            Submit Request
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- EMI Calculator Button -->
+                        <div class="card" style="width: 18rem;">
+                            <div class="card-body text-center">
+                                <i class="fas fa-calculator fa-3x text-success mb-3"></i>
+                                <h5 class="card-title">EMI Calculator</h5>
+                                <p class="card-text">
+                                    Calculate your monthly payments
+                                </p>
+                                <button type="button"
+                                        class="btn btn-outline-success"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#emiModal">
+                                    <i class="fas fa-calculator me-2"></i>
+                                    Calculate EMI
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- EMI Calculator Modal -->
+<div class="modal fade" id="emiModal" tabindex="-1" aria-labelledby="emiModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="emiModalLabel">EMI Calculator</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="emiForm">
+                    <div class="mb-3">
+                        <label class="form-label">Loan Amount (₹)</label>
+                        <input type="number"
+                               class="form-control"
+                               id="loanAmount"
+                               value="{{ vendor.franchise_investment|floatformat:0 }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Interest Rate (% p.a.)</label>
+                        <input type="number" class="form-control" id="interestRate" value="10.5">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Loan Tenure (Years)</label>
+                        <input type="number" class="form-control" id="loanTenure" value="5">
+                    </div>
+
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> For EMI calculations, please contact our finance team or use a financial calculator.
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock start %}

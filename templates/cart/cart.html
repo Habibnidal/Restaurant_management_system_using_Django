@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shopping Cart - FoodHub{% endblock %}
+
+{% block head %}
+<style>
+    .cart-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .cart-item {
+        background: var(--white);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .cart-item:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateX(5px);
+    }
+    
+    .food-img {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .quantity-btn {
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        border: 2px solid var(--primary-color);
+        background: white;
+        color: var(--primary-color);
+        transition: var(--transition);
+    }
+    
+    .quantity-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: scale(1.1);
+    }
+    
+    .quantity-input {
+        width: 60px;
+        text-align: center;
+        border: 2px solid #E0E0E0;
+        border-radius: var(--border-radius);
+        padding: 0.5rem;
+    }
+    
+    .cart-summary {
+        background: var(--white);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        position: sticky;
+        top: 100px;
+        border-top: 4px solid var(--primary-color);
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-bottom: 1px solid #E0E0E0;
+    }
+    
+    .summary-row:last-child {
+        border-bottom: none;
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        margin-top: 1rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--primary-color);
+    }
+</style>
+{% endblock head %}
+
+{% block start %}
+<div class="cart-container">
+    <div class="container">
+        <div class="cart-header">
+            <h2 class="mb-0">
+                <i class="fas fa-shopping-cart me-2"></i>Your Shopping Cart
+            </h2>
+            <p class="mb-0 mt-2 opacity-75">Review your items and proceed to checkout</p>
+        </div>
+        
+        {% if cart_items %}
+        <div class="row">
+            <div class="col-lg-8">
+                {% for item in cart_items %}
+                <div class="cart-item">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            {% if item.food_item.food_img %}
+                            <img src="{{ item.food_item.food_img.url }}" 
+                                 class="food-img w-100" 
+                                 alt="{{ item.food_item.food_name }}">
+                            {% else %}
+                            <div class="food-img w-100 d-flex align-items-center justify-content-center bg-light">
+                                <i class="fas fa-utensils fa-3x text-muted"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-5 mb-3 mb-md-0">
+                            <h5 class="mb-2">{{ item.food_item.food_name }}</h5>
+                            <p class="text-muted small mb-2">{{ item.food_item.food_desc|truncatechars:80 }}</p>
+                            <p class="text-muted small mb-0">
+                                <i class="fas fa-store me-1"></i>{{ item.food_item.vender.restaurent_name }}
+                            </p>
+                            <p class="text-primary fw-bold mb-0 mt-2">
+                                ₹{{ item.food_item.price|floatformat:2 }} each
+                            </p>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="quantity-controls justify-content-center mb-3">
+                                <!-- Decrease Quantity -->
+                                <form method="post" action="{% url 'cart:decrement_cart_item' item.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="quantity-btn" {% if item.quantity <= 1 %}disabled{% endif %}>
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                </form>
+                                
+                                <!-- Current Quantity Display -->
+                                <span class="quantity-input d-inline-block text-center" style="width: 60px; padding: 0.5rem; border: 2px solid #E0E0E0; border-radius: var(--border-radius);">
+                                    {{ item.quantity }}
+                                </span>
+                                
+                                <!-- Increase Quantity -->
+                                <form method="post" action="{% url 'cart:increment_cart_item' item.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="quantity-btn">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="text-center">
+                                <p class="fw-bold fs-5 text-primary mb-2">
+                                    ₹{{ item.total_price|floatformat:2 }}
+                                </p>
+                                <a href="{% url 'cart:remove_from_cart' item.id %}" 
+                                   class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash me-1"></i>Remove
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="col-lg-4">
+                <div class="cart-summary">
+                    <h5 class="mb-4">
+                        <i class="fas fa-receipt me-2"></i>Order Summary
+                    </h5>
+
+                    <div class="summary-row">
+                        <span>Subtotal ({{ cart_items|length }} item{{ cart_items|length|pluralize }}):</span>
+                        <span>₹{{ subtotal|floatformat:2 }}</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>
+                            <i class="fas fa-percentage me-1"></i>Tax (5% GST):
+                        </span>
+                        <span>₹{{ tax|floatformat:2 }}</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>
+                            <i class="fas fa-truck me-1"></i>Delivery Fee:
+                        </span>
+                        <span>₹{{ delivery_fee|floatformat:2 }}</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Total:</span>
+                        <span>₹{{ total|floatformat:2 }}</span>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{% url 'cart:checkout' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-credit-card me-2"></i>Proceed to Checkout
+                        </a>
+                        <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+                        </a>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <p class="small mb-0">
+                            <i class="fas fa-shield-alt text-success me-2"></i>
+                            Secure checkout with encrypted payment processing
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <h3 class="empty-title">Your cart is empty</h3>
+            <p class="empty-text">Looks like you haven't added anything to your cart yet.</p>
+            <a href="{% url 'home' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-utensils me-2"></i>Browse Restaurants
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock start %}

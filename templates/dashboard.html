@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{role}} Dashboard - FoodHub{% endblock %}
+
+{% block start %}
+<div class="dashboard-container">
+  <div class="container">
+    <div class="dashboard-header">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h1 class="mb-2">
+            <i class="fas fa-tachometer-alt me-2"></i>{{role}} Dashboard
+          </h1>
+          <p class="mb-0 opacity-75">Welcome back, {{user.username}}!</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+          {% if role == 'Vender' %}
+          <a href="{% url 'venders:addfood' %}" class="btn btn-light">
+            <i class="fas fa-plus-circle me-2"></i>Add Food Item
+          </a>
+          {% else %}
+          <a href="{% url 'update' %}" class="btn btn-light">
+            <i class="fas fa-edit me-2"></i>Update Profile
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {% if role == 'Vender' %}
+    <!-- Vendor Dashboard -->
+    <div class="row">
+      <div class="col-lg-4 mb-4">
+        <div class="dashboard-card">
+          <h5 class="mb-3">
+            <i class="fas fa-store text-primary me-2"></i>Restaurant Info
+          </h5>
+          <div class="info-item">
+            <span class="info-label">Vendor Name:</span>
+            <span class="info-value">{{user.username}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email:</span>
+            <span class="info-value">{{user.email}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Restaurant:</span>
+            <span class="info-value">{{user.multivenders.restaurent_name}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Address:</span>
+            <span class="info-value">{{user.multivenders.address}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">City:</span>
+            <span class="info-value">{{user.multivenders.city}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">State:</span>
+            <span class="info-value">{{user.multivenders.state}}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="dashboard-card">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="mb-0">
+              <i class="fas fa-utensils text-primary me-2"></i>Menu Items
+            </h5>
+            <a href="{% url 'venders:addfood' %}" class="btn btn-success btn-sm">
+              <i class="fas fa-plus me-1"></i>Add New
+            </a>
+          </div>
+
+          {% if fooditems %}
+          <div class="food-grid">
+            {% for food in fooditems %}
+            <div class="food-card card">
+              <img src="{{food.food_img.url}}" class="food-image" alt="{{food.food_name}}">
+              <div class="food-info">
+                <h5 class="food-name">{{food.food_name}}</h5>
+                <p class="food-description">{{food.food_desc|truncatewords:15}}</p>
+                <p class="food-price">₹{{food.price}}</p>
+                <div class="d-flex gap-2">
+                  <a href="{% url 'venders:foodedit' food.id %}" class="btn btn-primary btn-sm flex-fill">
+                    <i class="fas fa-edit me-1"></i>Edit
+                  </a>
+                  <a href="{% url 'venders:food_delete' food.id %}" class="btn btn-danger btn-sm">
+                    <i class="fas fa-trash me-1"></i>Delete
+                  </a>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="empty-state">
+            <div class="empty-icon">
+              <i class="fas fa-utensils"></i>
+            </div>
+            <h5 class="empty-title">No Menu Items Yet</h5>
+            <p class="empty-text">Start building your menu by adding food items.</p>
+            <a href="{% url 'venders:addfood' %}" class="btn btn-primary">
+              <i class="fas fa-plus me-2"></i>Add Your First Item
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {% elif role == 'Admin' %}
+    <!-- Admin Dashboard -->
+    <div class="dashboard-card">
+      <h3 class="text-center mb-4">
+        <i class="fas fa-user-shield text-primary me-2"></i>Admin Dashboard
+      </h3>
+      <p class="text-center text-muted">Admin panel content goes here</p>
+    </div>
+
+    {% else %}
+    <!-- Customer Dashboard -->
+    <div class="row">
+      <div class="col-lg-4 mb-4">
+        <div class="dashboard-card text-center">
+          {% if user.userdetails.img %}
+            <img src="{{user.userdetails.img.url}}" alt="Profile" class="profile-image mb-3">
+          {% else %}
+            <img src="{% static 'images/profile.png' %}" alt="Profile" class="profile-image mb-3">
+          {% endif %}
+          <h4>{{user.username}}</h4>
+          <p class="text-muted">{{user.email}}</p>
+          <a href="{% url 'update' %}" class="btn btn-primary w-100">
+            <i class="fas fa-edit me-2"></i>Update Profile
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="dashboard-card">
+          <h5 class="mb-4">
+            <i class="fas fa-user-circle text-primary me-2"></i>Profile Information
+          </h5>
+          <div class="info-item">
+            <span class="info-label">Username:</span>
+            <span class="info-value">{{user.username}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email:</span>
+            <span class="info-value">{{user.email}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Phone:</span>
+            <span class="info-value">{{user.userdetails.phone|default:"Not provided"}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Address:</span>
+            <span class="info-value">
+              {{user.userdetails.house_no|default:""}} 
+              {{user.userdetails.street|default:""}}, 
+              {{user.userdetails.city|default:"Not provided"}}, 
+              {{user.userdetails.zipcode|default:""}}
+            </span>
+          </div>
+        </div>
+
+        <div class="dashboard-card mt-4">
+          <h5 class="mb-4">
+            <i class="fas fa-shopping-cart text-primary me-2"></i>Quick Actions
+          </h5>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <a href="{% url 'home' %}" class="btn btn-outline-primary w-100">
+                <i class="fas fa-utensils me-2"></i>Browse Restaurants
+              </a>
+            </div>
+            <div class="col-md-6 mb-3">
+              <a href="{% url 'cart:view_cart' %}" class="btn btn-outline-success w-100">
+                <i class="fas fa-shopping-cart me-2"></i>View Cart
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock start %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block start %}
+<div class="container">
+    <div class="jumbotron">
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% if msg %}
+              <h3>{{msg}}</h3>
+            
+            {% else %}
+            <h4></h4>
+            <div class="row">
+                <div class="col-md-6">
+                    {{form.food_name | as_crispy_field}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    {{form.food_desc | as_crispy_field}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    {{form.price | as_crispy_field}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    {{form.food_img | as_crispy_field}}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <input type="submit" value="ADD" class="btn btn-success">
+                </div>
+            </div>
+            {% endif %}
+
+        </form>
+    </div>
+</div>
+
+{% endblock start %}

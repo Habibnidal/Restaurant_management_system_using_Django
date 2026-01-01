@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block head %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<style>
+    .card {
+        margin-bottom: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .food-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    .btn i {
+        margin-right: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block start %}
+<div class="container mt-4">
+    <div class="jumbotron p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="text-center mb-0">Vendor Dashboard</h1>
+            <div>
+                <a href="{% url 'venders:venderdetails' user.multivenders.id %}" class="btn btn-primary">
+                    <i class="fas fa-user"></i> View Profile
+                </a>
+
+                <a href="{% url 'venders:addfood' %}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add Food
+                </a>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4"><b><i class="fas fa-user"></i> Vendor Name:</b> {{ user.username }}</div>
+            <div class="col-md-4"><b><i class="fas fa-envelope"></i> Email:</b> {{ user.email }}</div>
+            <div class="col-md-4"><b><i class="fas fa-utensils"></i> Restaurant:</b> {{ user.multivenders.restaurent_name }}</div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4"><b><i class="fas fa-map-marker-alt"></i> Address:</b> {{ user.multivenders.address }}</div>
+            <div class="col-md-4"><b><i class="fas fa-city"></i> City:</b> {{ user.multivenders.city }}</div>
+            <div class="col-md-4"><b><i class="fas fa-flag"></i> State:</b> {{ user.multivenders.state }}</div>
+        </div>
+
+        <hr>
+
+        <!-- ✅ ACCEPTED FRANCHISE SECTION (ADDED ONLY) -->
+        <h3 class="mb-4"><i class="fas fa-handshake"></i> Accepted Franchise Partners</h3>
+
+        {% if accepted_franchises %}
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>User Name</th>
+                        <th>Email</th>
+                        <th>Accepted On</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in accepted_franchises %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ req.user.username }}</td>
+                        <td>{{ req.user.email }}</td>
+                        <td>
+                            {% if req.accepted_at %}
+                                {{ req.accepted_at|date:"d M Y" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-4">No franchise acceptances yet.</p>
+        {% endif %}
+
+        <hr>
+
+        <h3 class="mb-4"><i class="fas fa-utensils"></i> Menu</h3>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="row">
+            {% for food in fooditems %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{% if food.food_img %}{{ food.food_img.url }}{% else %}/static/images/default-food.jpg{% endif %}"
+                         class="card-img-top"
+                         alt="{{ food.food_name }}"
+                         style="height: 200px; object-fit: cover;">
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ food.food_name }}</h5>
+                        <p class="card-text">{{ food.food_desc|truncatewords:20 }}</p>
+                        <p class="card-text"><b>Price: ₹{{ food.price }}</b></p>
+
+                        <div class="mt-auto">
+                            {% if user.is_authenticated and user == food.vender.user %}
+                            <div class="food-actions">
+                                <a href="{% url 'venders:foodedit' food.id %}" class="btn btn-warning flex-grow-1">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+
+                                <form action="{% url 'venders:food_delete' food.id %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <a href="{% url 'cart:add_to_cart' food.id %}" class="btn btn-success w-100">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    You haven't added any food items yet.
+                    <a href="{% url 'venders:addfood' %}" class="alert-link">Add your first item</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

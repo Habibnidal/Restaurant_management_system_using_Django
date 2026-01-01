@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block start %}
+
+<div class="container">
+    <div class="jumbotron">
+        <div class="card card-body">
+
+            {% if registerd %}
+            <h1 style="text-align: center;">Thank you for the registration</h1>
+
+            {% else %}
+            <h1 style="text-align: center;">Vendor Registration Page</h1>
+            <form action="" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        {{form1.username | as_crispy_field}}
+                    </div>
+                    <div class="col-md-6">
+                        {{form1.email | as_crispy_field}}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        {{form2.restaurent_name | as_crispy_field}}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        {{form2.address | as_crispy_field}}
+                    </div>
+                    <div class="col-md-6">
+                        {{form2.city | as_crispy_field}}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        {{form2.state | as_crispy_field}}
+                    </div>
+                    <div class="col-md-6">
+                        {{form2.zipcode | as_crispy_field}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{form2.restaurent_img | as_crispy_field}}
+                    </div>
+                    <div class="col-md-6">
+                        {{form2.restaurent_lic | as_crispy_field}}
+                    </div>
+
+                </div>
+                <div class="row">
+
+                    {{form1.password | as_crispy_field}}
+
+                </div>
+
+                <input type="submit" value="Register" class="btn btn-primary">
+            </form>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% endblock start %}

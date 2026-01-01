@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Update Profile - FoodHub{% endblock %}
+
+{% block start %}
+<div class="dashboard-container">
+    <div class="container">
+        <div class="dashboard-header">
+            <h1 class="mb-2">
+                <i class="fas fa-user-edit me-2"></i>Update Profile
+            </h1>
+            <p class="mb-0 opacity-75">Keep your information up to date</p>
+        </div>
+
+        <div class="dashboard-card" style="max-width: 800px; margin: 0 auto;">
+            <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form.username | as_crispy_field }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.email | as_crispy_field }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form1.phone | as_crispy_field }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form1.house_no | as_crispy_field }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form1.street | as_crispy_field }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form1.city | as_crispy_field }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form1.state | as_crispy_field }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form1.zipcode | as_crispy_field }}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form1.img | as_crispy_field }}
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                    {% if user.user_type == 'customer' %}
+                    <a href="{% url 'customer_dashboard' %}" class="btn btn-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    {% elif user.user_type == 'vender' %}
+                    <a href="{% url 'vendor_dashboard' %}" class="btn btn-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    {% else %}
+                    <a href="/admin/" class="btn btn-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock start %}

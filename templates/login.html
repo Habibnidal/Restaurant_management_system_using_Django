@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Login - FoodHub{% endblock %}
+
+{% block start %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="mb-3">
+        <i class="fas fa-sign-in-alt fa-3x text-primary"></i>
+      </div>
+      <h2 class="auth-title">Welcome Back!</h2>
+      <p class="auth-subtitle">Sign in to your account to continue</p>
+    </div>
+
+    {% if form.errors or messages %}
+    <div class="alert alert-danger" role="alert">
+      <i class="fas fa-exclamation-circle me-2"></i>
+      {% for error in form.non_field_errors %}
+        {{ error }}
+      {% endfor %}
+      {% for message in messages %}
+        {{ message }}
+      {% endfor %}
+      {% if not form.non_field_errors and not messages %}
+        Please enter a correct username and password.
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <form method="POST" class="needs-validation" novalidate>
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label for="username" class="form-label">
+          <i class="fas fa-user me-2"></i>Username
+        </label>
+        <input
+          type="text"
+          name="username"
+          id="username"
+          class="form-control"
+          placeholder="Enter your username"
+          required
+          autofocus
+        >
+        <div class="invalid-feedback">
+          Please enter your username.
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">
+          <i class="fas fa-lock me-2"></i>Password
+        </label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          class="form-control"
+          placeholder="Enter your password"
+          required
+        >
+        <div class="invalid-feedback">
+          Please enter your password.
+        </div>
+      </div>
+
+      <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="rememberMe" name="remember_me">
+        <label class="form-check-label" for="rememberMe">
+          Remember me
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 mb-3">
+        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+      </button>
+    </form>
+
+    <div class="text-center">
+      <a href="{% url 'forgot_password' %}" class="text-decoration-none">
+        <i class="fas fa-key me-1"></i>Forgot Password?
+      </a>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="text-center">
+      <p class="mb-2">Don't have an account?</p>
+      <a href="{% url 'register' %}" class="btn btn-outline-primary w-100">
+        <i class="fas fa-user-plus me-2"></i>Create New Account
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock start %}
