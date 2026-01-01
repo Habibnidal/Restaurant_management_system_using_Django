@@ -22,6 +22,7 @@ def registration(request):
             user = form1.save(commit=False)
             user.set_password(form1.cleaned_data['password'])
             user.save()
+            userDetails.objects.create(user=user)
             registerd = True
             return redirect('login')
 
