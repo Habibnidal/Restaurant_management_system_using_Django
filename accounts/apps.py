@@ -1,15 +1,14 @@
 from django.apps import AppConfig
 
 class AccountsConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
     name = "accounts"
 
     def ready(self):
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-
-        if not User.objects.filter(username="admin").exists():
-            User.objects.create_superuser(
-                username="admin",
-                email="admin@example.com",
-                password="admin123"
-            )
+        import sys
+        if "runserver" in sys.argv or "gunicorn" in sys.argv:
+            try:
+                from django.core.management import call_command
+                call_command("migrate", interactive=False)
+            except Exception as e:
+                print("Migration skipped:", e)
