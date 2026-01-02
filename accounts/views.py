@@ -103,13 +103,15 @@ def vendor_dashboard(request):
 # =========================
 @login_required(login_url="login")
 def customer_dashboard(request):
-    profile, created = userDetails.objects.get_or_create(
-        user=request.user
-    )
+    try:
+        profile = userDetails.objects.get(user=request.user)
+    except userDetails.DoesNotExist:
+        profile = None
 
     return render(request, "accounts/customer_dashboard.html", {
         "profile": profile
     })
+
 
 
 # =========================
