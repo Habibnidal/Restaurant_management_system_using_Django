@@ -49,19 +49,18 @@ def user_login(request):
 
         user = authenticate(username=username, password=password)
 
-        if user is not None:
+        if user:
             login(request, user)
 
             if multiVenders.objects.filter(user=user).exists():
-                request.session['user_type'] = 'Vender'
                 return redirect('vendor_dashboard')
 
-            # ALWAYS treat normal users as customers
-            profile, created = userDetails.objects.get_or_create(user=user)
-            request.session['user_type'] = 'Customer'
-            return redirect('customer_dashboard')
+            if userDetails.objects.filter(user=user).exists():
+                return redirect('customer_dashboard')
 
-        return HttpResponse('<h1>Please check your credentials</h1>')
+            return redirect('home')
+
+        return HttpResponse("Invalid credentials")
 
     return render(request, 'login.html')
 
