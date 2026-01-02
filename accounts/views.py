@@ -70,8 +70,15 @@ def user_login(request):
 # =========================
 @login_required(login_url="login")
 def home(request):
-    venders = multiVenders.objects.all()
-    return render(request, 'index.html', {'venders': venders})
+    try:
+        venders = multiVenders.objects.filter(is_approved=True)
+        return render(request, 'index.html', {'venders': venders})
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in home view: {str(e)}")
+        messages.error(request, "An error occurred while loading the page.")
+        return render(request, 'index.html', {'venders': []})
 
 
 # =========================
@@ -79,18 +86,28 @@ def home(request):
 # =========================
 @login_required(login_url="login")
 def vendor_dashboard(request):
-    vendor = multiVenders.objects.get(user=request.user)
+    try:
+        vendor = multiVenders.objects.get(user=request.user)
 
-    accepted_franchises = FranchiseRequest.objects.filter(
-        vendor=vendor,
-        status='accepted'
-    ).select_related('user')
+        accepted_franchises = FranchiseRequest.objects.filter(
+            vendor=vendor,
+            status='accepted'
+        ).select_related('user')
 
-    return render(request, 'venders/vendor_dashboard.html', {
-        'vendor': vendor,
-        'fooditems': foodItem.objects.filter(vender=vendor),
-        'accepted_franchises': accepted_franchises
-    })
+        return render(request, 'venders/vendor_dashboard.html', {
+            'vendor': vendor,
+            'fooditems': foodItem.objects.filter(vender=vendor),
+            'accepted_franchises': accepted_franchises
+        })
+    except multiVenders.DoesNotExist:
+        messages.error(request, "Vendor profile not found. Please complete your vendor registration.")
+        return redirect('home')
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in vendor_dashboard: {str(e)}")
+        messages.error(request, "An error occurred. Please try again later.")
+        return redirect('home')
 
 
 # =========================

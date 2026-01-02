@@ -25,5 +25,12 @@ urlpatterns = [
     path('vender/', include('venders.urls', namespace='venders')),  # Add namespace here
     path('cart/', include('cart.urls')),
     path('admin/', admin.site.urls),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+
+# Only serve media files in development (not needed with Cloudinary in production)
+if settings.DEBUG and hasattr(settings, 'MEDIA_ROOT') and settings.MEDIA_ROOT:
+    try:
+        urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    except Exception:
+        pass  # Skip static media serving if there's an error
 

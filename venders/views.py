@@ -33,40 +33,55 @@ def venderRegister(request):
     })
 
 def vender_details(request, id):
-    vender = get_object_or_404(multiVenders, id=id)
-    fooditems = foodItem.objects.filter(vender=id)
-    
-    user_has_pending_request = False
-    if request.user.is_authenticated:
-        user_has_pending_request = FranchiseRequest.objects.filter(
-            vendor=vender,
-            user=request.user,
-            status='pending'
-        ).exists()
-    
-    return render(request, 'venders/vender_details.html', {
-        'vender': vender,
-        'fooditems': fooditems,
-        'user_has_pending_request': user_has_pending_request,
-    })
+    try:
+        vender = get_object_or_404(multiVenders, id=id)
+        fooditems = foodItem.objects.filter(vender=id)
+        
+        user_has_pending_request = False
+        if request.user.is_authenticated:
+            user_has_pending_request = FranchiseRequest.objects.filter(
+                vendor=vender,
+                user=request.user,
+                status='pending'
+            ).exists()
+        
+        return render(request, 'venders/vender_details.html', {
+            'vender': vender,
+            'fooditems': fooditems,
+            'user_has_pending_request': user_has_pending_request,
+        })
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in vender_details view: {str(e)}")
+        messages.error(request, "An error occurred while loading vendor details.")
+        return redirect('home')
 
 @login_required
 def addFood(request):
-    if not hasattr(request.user, 'multivenders'):
-        raise PermissionDenied("Only vendors can add food items.")
+    try:
+        if not hasattr(request.user, 'multivenders'):
+            messages.error(request, "Only vendors can add food items.")
+            return redirect('home')
 
-    if request.method == "POST":
-        form = addFoodForm(request.POST, request.FILES)
-        if form.is_valid():
-            item = form.save(commit=False)
-            item.vender = request.user.multivenders
-            item.save()
-            messages.success(request, 'Food item added successfully!')
-            return redirect('vendor_dashboard')
-    else:
-        form = addFoodForm()
-    
-    return render(request, 'venders/addfood.html', {'form': form})
+        if request.method == "POST":
+            form = addFoodForm(request.POST, request.FILES)
+            if form.is_valid():
+                item = form.save(commit=False)
+                item.vender = request.user.multivenders
+                item.save()
+                messages.success(request, 'Food item added successfully!')
+                return redirect('vendor_dashboard')
+        else:
+            form = addFoodForm()
+        
+        return render(request, 'venders/addfood.html', {'form': form})
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in addFood view: {str(e)}")
+        messages.error(request, f'An error occurred: {str(e)}')
+        return redirect('vendor_dashboard')
 
 @login_required
 def food_edit(request, id):
@@ -114,30 +129,37 @@ def food_delete(request, id):
 
 @login_required
 def request_franchise(request, vendor_id):
-    vendor = get_object_or_404(multiVenders, id=vendor_id)
-    
-    if not vendor.is_franchise_available:
-        messages.error(request, "Franchise is not available for this restaurant.")
+    try:
+        vendor = get_object_or_404(multiVenders, id=vendor_id)
+        
+        if not vendor.is_franchise_available:
+            messages.error(request, "Franchise is not available for this restaurant.")
+            return redirect('venders:venderdetails', id=vendor_id)
+        
+        existing_request = FranchiseRequest.objects.filter(
+            vendor=vendor,
+            user=request.user,
+            status='pending'
+        ).exists()
+        
+        if existing_request:
+            messages.info(request, "You already have a pending franchise request for this restaurant.")
+            return redirect('venders:venderdetails', id=vendor_id)
+        
+        FranchiseRequest.objects.create(
+            vendor=vendor,
+            user=request.user,
+            status='pending'
+        )
+        
+        messages.success(request, "Your franchise request has been submitted successfully!")
         return redirect('venders:venderdetails', id=vendor_id)
-    
-    existing_request = FranchiseRequest.objects.filter(
-        vendor=vendor,
-        user=request.user,
-        status='pending'
-    ).exists()
-    
-    if existing_request:
-        messages.info(request, "You already have a pending franchise request for this restaurant.")
-        return redirect('venders:venderdetails', id=vendor_id)
-    
-    FranchiseRequest.objects.create(
-        vendor=vendor,
-        user=request.user,
-        status='pending'
-    )
-    
-    messages.success(request, "Your franchise request has been submitted successfully!")
-    return redirect('venders:venderdetails', id=vendor_id)
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in request_franchise view: {str(e)}")
+        messages.error(request, "An error occurred while submitting your request.")
+        return redirect('home')
 
 @login_required
 def edit_vendor(request, id):
@@ -188,30 +210,44 @@ def franchise_details(request, vendor_id):
 
 @login_required
 def franchise_requests(request):
-    if not hasattr(request.user, 'multivenders'):
-        messages.error(request, "Only vendors can view franchise requests.")
-        return redirect('home')
+    try:
+        if not hasattr(request.user, 'multivenders'):
+            messages.error(request, "Only vendors can view franchise requests.")
+            return redirect('home')
+            
+        vendor = request.user.multivenders
+        requests = FranchiseRequest.objects.filter(vendor=vendor).order_by('-requested_at')
         
-    vendor = request.user.multivenders
-    requests = FranchiseRequest.objects.filter(vendor=vendor).order_by('-created_at')
-    
-    return render(request, 'venders/franchise_requests.html', {
-        'requests': requests
-    })
+        return render(request, 'venders/franchise_requests.html', {
+            'requests': requests
+        })
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in franchise_requests view: {str(e)}")
+        messages.error(request, "An error occurred while loading franchise requests.")
+        return redirect('home')
 @login_required
 def accepted_franchises(request):
-    if not hasattr(request.user, 'multivenders'):
-        messages.error(request, "Only vendors can view accepted franchises.")
+    try:
+        if not hasattr(request.user, 'multivenders'):
+            messages.error(request, "Only vendors can view accepted franchises.")
+            return redirect('home')
+
+        vendor = request.user.multivenders
+
+        accepted_requests = FranchiseRequest.objects.filter(
+            vendor=vendor,
+            status='accepted'
+        )
+
+        return render(request, 'venders/accepted_franchises.html', {
+            'accepted_requests': accepted_requests
+        })
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in accepted_franchises view: {str(e)}")
+        messages.error(request, "An error occurred while loading accepted franchises.")
         return redirect('home')
-
-    vendor = request.user.multivenders
-
-    accepted_requests = FranchiseRequest.objects.filter(
-        vendor=vendor,
-        status='accepted'
-    )
-
-    return render(request, 'venders/accepted_franchises.html', {
-        'accepted_requests': accepted_requests
-    })
 

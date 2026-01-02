@@ -24,8 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 
-SECRET_KEY = os.environ.get("SECRET_KEY")
-DEBUG = os.environ.get("DEBUG") == "True"
+SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-change-this-in-production")
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 
 ALLOWED_HOSTS = os.environ.get(
@@ -157,8 +157,9 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # media files
-# MEDIA_URL = '/media/'
-# MEDIA_ROOT= os.path.join(BASE_DIR,'media/')
+# Using Cloudinary for media storage in production
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # Default primary key field type
@@ -188,17 +189,66 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 #     'MESSAGE': 'The session has expired. Please login again to continue.',
 #     'REDIRECT_TO_LOGIN_IMMEDIATELY': True,
 # }
-CSRF_TRUSTED_ORIGINS = [
+# CSRF Trusted Origins - Get from environment variable or use default
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    "CSRF_TRUSTED_ORIGINS",
     "https://your-app-name.onrender.com"
-]
+).split()
 
+# Cloudinary Configuration with error handling
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 
-cloudinary.config(
-    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.environ.get("CLOUDINARY_API_KEY"),
-    api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
-)
+# Only configure Cloudinary if credentials are available
+CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME")
+CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY")
+CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET")
+
+if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
+    try:
+        cloudinary.config(
+            cloud_name=CLOUDINARY_CLOUD_NAME,
+            api_key=CLOUDINARY_API_KEY,
+            api_secret=CLOUDINARY_API_SECRET,
+        )
+    except Exception as e:
+        # Log error but don't crash the app
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Cloudinary configuration error: {str(e)}")
+else:
+    # Log warning if Cloudinary credentials are missing
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.warning("Cloudinary credentials not found in environment variables")
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+    },
+}
 

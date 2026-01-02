@@ -34,6 +34,18 @@ def view_cart(request):
             'delivery_fee': 0,
             'total': 0,
         })
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in view_cart: {str(e)}")
+        messages.error(request, "An error occurred while loading your cart.")
+        return render(request, 'cart/cart.html', {
+            'cart_items': [],
+            'subtotal': 0,
+            'tax': 0,
+            'delivery_fee': 0,
+            'total': 0,
+        })
 
 from django.http import JsonResponse
 
@@ -158,5 +170,11 @@ def checkout(request):
         return render(request, 'cart/payment.html', context)
     except Cart.DoesNotExist:
         messages.warning(request, "Your cart is empty.")
+        return redirect('cart:view_cart')
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in checkout: {str(e)}")
+        messages.error(request, "An error occurred during checkout.")
         return redirect('cart:view_cart')
 

@@ -79,7 +79,13 @@
           <div class="food-grid">
             {% for food in fooditems %}
             <div class="food-card card">
+              {% if food.food_img %}
               <img src="{{food.food_img.url}}" class="food-image" alt="{{food.food_name}}">
+              {% else %}
+              <div class="food-image bg-light d-flex align-items-center justify-content-center">
+                <i class="fas fa-utensils fa-3x text-muted"></i>
+              </div>
+              {% endif %}
               <div class="food-info">
                 <h5 class="food-name">{{food.food_name}}</h5>
                 <p class="food-description">{{food.food_desc|truncatewords:15}}</p>
