@@ -30,7 +30,8 @@
         </div>
       {% endif %}
 
-      <form method="post">
+      <form method="post" enctype="multipart/form-data">
+
         {% csrf_token %}
 
         {{ form1.username|as_crispy_field }}

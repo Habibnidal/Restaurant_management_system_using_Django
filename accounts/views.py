@@ -18,24 +18,30 @@ def registration(request):
 
     if request.method == 'POST':
         form1 = UserForm(request.POST)
+        form2 = UpdateUserProfileform(request.POST, request.FILES)
 
-        if form1.is_valid():
+        if form1.is_valid() and form2.is_valid():
             user = form1.save(commit=False)
             user.set_password(form1.cleaned_data['password'])
             user.save()
 
-            # ✅ ENSURE PROFILE EXISTS
-            userDetails.objects.get_or_create(user=user)
+            profile = form2.save(commit=False)
+            profile.user = user
+            profile.save()
 
             registerd = True
             return redirect('login')
+
     else:
         form1 = UserForm()
+        form2 = UpdateUserProfileform()
 
     return render(request, 'registration.html', {
         'form1': form1,
+        'form2': form2,
         'registerd': registerd
     })
+
 
 
 # =========================
@@ -51,18 +57,14 @@ def user_login(request):
         if user is not None:
             login(request, user)
 
-            # Vendor check
             if multiVenders.objects.filter(user=user).exists():
                 request.session['user_type'] = 'Vender'
                 return redirect('vendor_dashboard')
 
-            # Customer check
-            if userDetails.objects.filter(user=user).exists():
-                request.session['user_type'] = 'Customer'
-                return redirect('customer_dashboard')
-
-            # Fallback (safe)
-            return redirect('home')
+            # ALWAYS treat normal users as customers
+            profile, created = userDetails.objects.get_or_create(user=user)
+            request.session['user_type'] = 'Customer'
+            return redirect('customer_dashboard')
 
         return HttpResponse('<h1>Please check your credentials</h1>')
 
