@@ -18,30 +18,25 @@ def registration(request):
 
     if request.method == 'POST':
         form1 = UserForm(request.POST)
-        form2 = UpdateUserProfileform(request.POST, request.FILES)
 
-        if form1.is_valid() and form2.is_valid():
+        if form1.is_valid():
             user = form1.save(commit=False)
             user.set_password(form1.cleaned_data['password'])
             user.save()
 
-            profile = form2.save(commit=False)
-            profile.user = user
-            profile.save()
+            # ✅ Create EMPTY profile safely
+            userDetails.objects.get_or_create(user=user)
 
             registerd = True
             return redirect('login')
 
     else:
         form1 = UserForm()
-        form2 = UpdateUserProfileform()
 
     return render(request, 'registration.html', {
         'form1': form1,
-        'form2': form2,
         'registerd': registerd
     })
-
 
 
 # =========================
