@@ -3,6 +3,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth.models import User
 
 from accounts.forms import UserForm, UserUpdateForm, UpdateUserProfileform
 from accounts.models import userDetails
@@ -22,10 +23,12 @@ def registration(request):
             user = form1.save(commit=False)
             user.set_password(form1.cleaned_data['password'])
             user.save()
-            userDetails.objects.create(user=user)
+
+            # ✅ ENSURE PROFILE EXISTS
+            userDetails.objects.get_or_create(user=user)
+
             registerd = True
             return redirect('login')
-
     else:
         form1 = UserForm()
 
@@ -48,17 +51,18 @@ def user_login(request):
         if user is not None:
             login(request, user)
 
-            # ROLE CHECK (SAFE)
+            # Vendor check
             if multiVenders.objects.filter(user=user).exists():
                 request.session['user_type'] = 'Vender'
                 return redirect('vendor_dashboard')
 
-            elif userDetails.objects.filter(user=user).exists():
+            # Customer check
+            if userDetails.objects.filter(user=user).exists():
                 request.session['user_type'] = 'Customer'
                 return redirect('customer_dashboard')
 
-            else:
-                return redirect('/admin/')
+            # Fallback (safe)
+            return redirect('home')
 
         return HttpResponse('<h1>Please check your credentials</h1>')
 
@@ -70,15 +74,8 @@ def user_login(request):
 # =========================
 @login_required(login_url="login")
 def home(request):
-    try:
-        venders = multiVenders.objects.filter(is_approved=True)
-        return render(request, 'index.html', {'venders': venders})
-    except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"Error in home view: {str(e)}")
-        messages.error(request, "An error occurred while loading the page.")
-        return render(request, 'index.html', {'venders': []})
+    venders = multiVenders.objects.filter(is_approved=True)
+    return render(request, 'index.html', {'venders': venders})
 
 
 # =========================
@@ -99,14 +96,9 @@ def vendor_dashboard(request):
             'fooditems': foodItem.objects.filter(vender=vendor),
             'accepted_franchises': accepted_franchises
         })
+
     except multiVenders.DoesNotExist:
-        messages.error(request, "Vendor profile not found. Please complete your vendor registration.")
-        return redirect('home')
-    except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"Error in vendor_dashboard: {str(e)}")
-        messages.error(request, "An error occurred. Please try again later.")
+        messages.error(request, "Vendor profile not found.")
         return redirect('home')
 
 
@@ -115,7 +107,13 @@ def vendor_dashboard(request):
 # =========================
 @login_required(login_url="login")
 def customer_dashboard(request):
-    return render(request, "accounts/customer_dashboard.html")
+    profile, created = userDetails.objects.get_or_create(
+        user=request.user
+    )
+
+    return render(request, "accounts/customer_dashboard.html", {
+        "profile": profile
+    })
 
 
 # =========================
@@ -123,14 +121,18 @@ def customer_dashboard(request):
 # =========================
 @login_required(login_url="login")
 def update(request):
-    form = UserUpdateForm(instance=request.user)
-
     profile, created = userDetails.objects.get_or_create(user=request.user)
+
+    form = UserUpdateForm(instance=request.user)
     form1 = UpdateUserProfileform(instance=profile)
 
     if request.method == "POST":
         form = UserUpdateForm(request.POST, instance=request.user)
-        form1 = UpdateUserProfileform(request.POST, request.FILES, instance=profile)
+        form1 = UpdateUserProfileform(
+            request.POST,
+            request.FILES,
+            instance=profile
+        )
 
         if form.is_valid() and form1.is_valid():
             form.save()
@@ -138,8 +140,7 @@ def update(request):
 
             if multiVenders.objects.filter(user=request.user).exists():
                 return redirect('vendor_dashboard')
-            else:
-                return redirect('customer_dashboard')
+            return redirect('customer_dashboard')
 
     return render(request, "update.html", {
         "form": form,
@@ -159,8 +160,6 @@ def user_logout(request):
 # =========================
 # FORGOT PASSWORD
 # =========================
-from django.contrib.auth.models import User
-
 def forgot_password(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -175,11 +174,9 @@ def forgot_password(request):
             user = User.objects.get(username=username)
             user.set_password(password1)
             user.save()
-            messages.success(request, "Password changed successfully. Please login.")
+            messages.success(request, "Password changed successfully.")
             return redirect('login')
         except User.DoesNotExist:
             messages.error(request, "User not found")
-            return redirect('forgot_password')
 
     return render(request, 'accounts/forgot_password.html')
-

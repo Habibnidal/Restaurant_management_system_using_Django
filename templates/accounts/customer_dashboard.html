@@ -16,8 +16,8 @@
     <div class="row">
       <div class="col-lg-4 mb-4">
         <div class="dashboard-card text-center">
-          {% if user.userdetails.img %}
-            <img src="{{ user.userdetails.img.url }}" alt="Profile" class="profile-image mb-3">
+          {% if profile.img %}
+            <img src="{{ profile.img.url }}" alt="Profile" class="profile-image mb-3">
           {% else %}
             <img src="{% static 'images/profile.png' %}" alt="Profile" class="profile-image mb-3">
           {% endif %}
@@ -48,48 +48,56 @@
           <h5 class="mb-4">
             <i class="fas fa-info-circle text-primary me-2"></i>Profile Information
           </h5>
+
           <div class="info-item">
             <span class="info-label">
               <i class="fas fa-user me-2"></i>Username:
             </span>
             <span class="info-value">{{ user.username }}</span>
           </div>
+
           <div class="info-item">
             <span class="info-label">
               <i class="fas fa-envelope me-2"></i>Email:
             </span>
             <span class="info-value">{{ user.email }}</span>
           </div>
+
           <div class="info-item">
             <span class="info-label">
               <i class="fas fa-phone me-2"></i>Phone:
             </span>
-            <span class="info-value">{{ user.userdetails.phone|default:"Not provided" }}</span>
+            <span class="info-value">{{ profile.phone|default:"Not provided" }}</span>
           </div>
+
           <div class="info-item">
             <span class="info-label">
               <i class="fas fa-home me-2"></i>House No:
             </span>
-            <span class="info-value">{{ user.userdetails.house_no|default:"Not provided" }}</span>
+            <span class="info-value">{{ profile.house_no|default:"Not provided" }}</span>
           </div>
+
           <div class="info-item">
             <span class="info-label">
               <i class="fas fa-road me-2"></i>Street:
             </span>
-            <span class="info-value">{{ user.userdetails.street|default:"Not provided" }}</span>
+            <span class="info-value">{{ profile.street|default:"Not provided" }}</span>
           </div>
+
           <div class="info-item">
             <span class="info-label">
               <i class="fas fa-city me-2"></i>City:
             </span>
-            <span class="info-value">{{ user.userdetails.city|default:"Not provided" }}</span>
+            <span class="info-value">{{ profile.city|default:"Not provided" }}</span>
           </div>
+
           <div class="info-item">
             <span class="info-label">
               <i class="fas fa-mail-bulk me-2"></i>Zipcode:
             </span>
-            <span class="info-value">{{ user.userdetails.zipcode|default:"Not provided" }}</span>
+            <span class="info-value">{{ profile.zipcode|default:"Not provided" }}</span>
           </div>
+
         </div>
       </div>
     </div>
