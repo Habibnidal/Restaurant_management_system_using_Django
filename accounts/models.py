@@ -7,15 +7,16 @@ from cloudinary.models import CloudinaryField
 class userDetails(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
-    phone = models.BigIntegerField(blank=True, null=True)
-    house_no = models.PositiveIntegerField(blank=True, null=True)
-    street = models.CharField(max_length=100, blank=True, null=True)
-    city = models.CharField(max_length=100, blank=True, null=True)
-    state = models.CharField(max_length=100, blank=True, null=True)
-    zipcode = models.CharField(max_length=100, blank=True, null=True)
+    phone = models.BigIntegerField(null=True, blank=True)
+    house_no = models.PositiveIntegerField(null=True, blank=True)
+    street = models.CharField(max_length=100, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    state = models.CharField(max_length=100, null=True, blank=True)
+    zipcode = models.CharField(max_length=100, null=True, blank=True)
 
     img = CloudinaryField('image', blank=True, null=True)
     user_type = models.CharField(max_length=100, default='customer')
+
 
 
     def __str__(self):
