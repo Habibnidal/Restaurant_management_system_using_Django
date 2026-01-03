@@ -14,5 +14,6 @@ urlpatterns = [
     # Old dashboard — optional
     path('logout/', views.user_logout, name='logout'),
     path('update/',views.update, name='update'),
-    path('forgot_password/', views.forgot_password, name='forgot_password')
+    path('forgot_password/', views.forgot_password, name='forgot_password'),
+    
 ]
