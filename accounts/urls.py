@@ -8,7 +8,7 @@ urlpatterns = [
     path('login/', views.user_login, name='login'),
 
     # NEW DASHBOARD ROUTES
-    path('dashboard/vendor/', views.vendor_dashboard, name='vendor_dashboard'),
+    # path('dashboard/vendor/', views.vendor_dashboard, name='vendor_dashboard'),
     path('dashboard/customer/', views.customer_dashboard, name='customer_dashboard'),
 
     # Old dashboard — optional
