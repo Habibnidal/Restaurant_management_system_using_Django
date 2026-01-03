@@ -7,9 +7,6 @@ from django.contrib import messages
 from accounts.forms import UserForm, UserUpdateForm, UpdateUserProfileform
 from accounts.models import userDetails
 from venders.models import multiVenders, foodItem, FranchiseRequest
-from django.contrib.auth.models import User
-from django.http import HttpResponse
-
 
 
 # =========================
@@ -185,13 +182,4 @@ def forgot_password(request):
             return redirect('forgot_password')
 
     return render(request, 'accounts/forgot_password.html')
-def create_admin_once(request):
-    if User.objects.filter(username="admin").exists():
-        return HttpResponse("Admin already exists")
 
-    User.objects.create_superuser(
-        username="admin",
-        email="admin@example.com",
-        password="admin123"
-    )
-    return HttpResponse("Admin created")

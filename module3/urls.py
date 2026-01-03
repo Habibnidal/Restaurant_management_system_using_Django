@@ -18,7 +18,6 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from accounts.views import create_admin_once
 
 
 
@@ -27,7 +26,6 @@ urlpatterns = [
     path('vender/', include('venders.urls', namespace='venders')),  # Add namespace here
     path('cart/', include('cart.urls')),
     path('admin/', admin.site.urls),
-    path('create-admin/', create_admin_once)
 ]
 
 # Only serve media files in development (not needed with Cloudinary in production)
